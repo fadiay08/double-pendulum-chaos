@@ -21,36 +21,6 @@ This project investigates when a double pendulum transitions from **stable motio
 - θ₁ (upper pendulum angle) is the dominant factor that triggers chaos.  
 - Chaos occurs almost always when θ₁ ≥ 90°, even if θ₂ is small.
 
----
-
-##  Repository Structure
-
-double-pendulum-chaos/
-│
-├── code/
-│ ├── double_pendulum_simulation.py
-│ ├── utils.py
-│ └── examples/
-│ ├── sim_theta1_60_theta2_120.png
-│ ├── sim_theta1_75_theta2_75.png
-│ └── ...
-│
-├── experiment/
-│ ├── tracker_data.csv
-│ ├── experiment_examples/
-│ │ ├── exp_theta1_90_theta2_0.png
-│ │ ├── exp_theta1_75_theta2_15.png
-│ │ └── ...
-│ └── description.md
-│
-├── report/
-│ ├── Double_Pendulum_Chaos_Fadi_Ayoub.pdf
-│ └── derivations_appendix.pdf
-│
-└── README.md
-
-yaml
-Copy code
 
 ---
 
