@@ -1,151 +1,72 @@
-# double-pendulum-chaos
-An overview of the initial angle's effect on a double pendulum's chaos
 # Double Pendulum – Chaos Analysis
 
-**Author:** Fadi Ayoub  
-**Project:** Research project analyzing chaotic behavior in a double pendulum using numerical simulation and physical experimentation.
+**Author:** Fadi Ayoub
+**Project:** Numerical simulation and physical experimentation investigating when a double pendulum's motion transitions from stable to chaotic behavior, as a function of its initial angles.
 
----
+> ⚠️ **TODO before this goes in any application:** the original write-up (see below) lists this as a joint project with Nahed Mansour, submitted as a 2-unit research project through the Maala program. Decide together how you're presenting authorship/contribution here and update this README and your application materials accordingly *before* anyone else reads this repo.
 
-##  Overview
+## Overview
 
-This project investigates when a double pendulum transitions from **stable motion** to **chaotic behavior**, by analyzing:
+A double pendulum — two rods and masses connected in series — is a classic nonlinear, chaotic system: tiny changes in initial angle can produce completely different long-term motion. This project asks: **at what initial angles does that chaotic behavior actually kick in?**
 
-- The **nonlinear differential equations** governing the system
-- A **numerical simulation** (Euler method)
-- A **physical experiment** using video tracking
-- Systematic comparison between **symmetric and asymmetric initial angles**
+The equations of motion were derived from scratch using the Euler–Lagrange method (full derivation in the write-up), solved numerically with the Euler method, and checked against a real physical double pendulum tracked on video.
 
-**Main observation:**
+**Main finding:** θ₁ (the upper pendulum's angle) is the dominant factor. Chaos appears almost every time θ₁ ≥ 90°, regardless of θ₂, while θ₂ alone rarely triggers it. Symmetric angles (θ₁ ≈ θ₂) tend to stay more stable than asymmetric ones with the same sum.
 
-- θ₁ (upper pendulum angle) is the dominant factor that triggers chaos.  
-- Chaos occurs almost always when θ₁ ≥ 90°, even if θ₂ is small.
+## Repository structure
 
+```text
+double-pendulum-chaos/
+├── README.md
+├── LICENSE
+├── requirements.txt
+├── code/
+│   ├── simulation_sweep.py       # Euler-method simulation across 30 angle pairs, with
+│   │                              # perturbation-based chaos detection (delta = 0.1°)
+│   ├── experiment_comparison.py  # Digitized video-tracking data (Tracker software) from
+│   │                              # the physical double pendulum, compared across two
+│   │                              # camera angles (A/B), for 9 tested angle combinations
+│   └── animation.py              # Matplotlib animation comparing 5 simulated pendulums
+│                                  # with slightly perturbed initial angles (built for
+│                                  # Colab; see note in that file to save locally)
+├── results/
+│   ├── simulation_angle_sweep.png        # all 30 simulated angle pairs, Sim A vs Sim B
+│   └── experiment_theta1_*_theta2_*.png  # 9 physical-experiment trajectory plots
+└── docs/
+    ├── double_pendulum_english.docx      # full write-up: derivation, methodology, results
+    └── מטוטלת_כפולה_הערות.docx            # original Hebrew notes
+```
 
----
+## Running it
 
-##  Background
+```bash
+pip install -r requirements.txt
+python code/simulation_sweep.py         # regenerates results/simulation_angle_sweep.png
+python code/experiment_comparison.py    # regenerates the 9 experiment comparison plots
+```
 
-A double pendulum consists of two masses connected by rigid rods:
+Both scripts were verified to run standalone, top to bottom, with no Colab dependencies.
 
-- **M₁, M₂** — masses  
-- **L₁, L₂** — rod lengths  
-- **θ₁, θ₂** — angles from the vertical  
+**Note on `experiment_comparison.py`:** the version originally exported from Colab was missing a variable-unpacking step before its first plot — it only worked in Colab because those variables happened to be left over in memory from a later cell that had been run out of order during interactive development. That's fixed here (see the comment marked `NOTE` near the top of the first block) so the script now runs correctly as a linear script.
 
-The system is **non-linear and often chaotic**:
+## Method summary
 
-- Tiny changes in initial angles → completely different long-term behavior  
-- No closed-form analytical solution  
-- Numerical simulations diverge exponentially due to sensitivity
+- **Simulation:** for each of 30 initial-angle pairs, two nearly identical runs (initial angles differing by 0.1°) are simulated with the Euler method. If the two trajectories' tip positions diverge by more than 0.1 m, that's logged as the onset of chaos.
+- **Physical experiment:** a real double pendulum (L₁ = 24 cm, L₂ = 20 cm) was built, released from 9 different angle combinations, and filmed from two angles. Motion was digitized with Tracker software; the two camera views (A/B) are plotted together as a consistency check.
+- Full derivation of the equations of motion, the complete results discussion, and conclusions are in `docs/double_pendulum_english.docx`.
 
----
+## Key results
 
-## 🧮 Mathematical Model
+| Setup | Outcome |
+|---|---|
+| θ₁ ≤ 75°, any θ₂ | Stable |
+| θ₁ ≥ 90° | Chaotic almost always, even for small θ₂ |
+| θ₁ = θ₂ (symmetric) | More stable than asymmetric pairs with the same sum |
+| θ₁ + θ₂ = constant | Not a reliable predictor by itself — e.g. (60°,90°) stable, (30°,120°) chaotic |
 
-The dynamics were derived using the **Euler–Lagrange equation**:
+See `docs/double_pendulum_english.docx` for the full results and discussion, including the physical-experiment findings, which matched the simulation.
 
-dtd​(∂θ˙i​∂L​)−∂θi​∂L​=0      i=1,2
+## Sources
 
-where:
-
-
-L = T - V
-
-
-After full derivation, the equations of motion are:
-
-θ₁''= (-g*(2M1+M2)*sin(θ1)
- - M2*g*sin(θ1-2θ2)
- - 2*sin(θ1-θ2)*M2*(θ2_dot^2*L2 + θ1_dot^2*L1*cos(θ1-θ2)))
- / (L1*(2M1+M2 - M2*cos(2θ1 - 2θ2)))
-
-
-θ₂'' =
-(2*sin(θ1-θ2)*(θ1_dot^2*L1*(M1+M2)
- + g*(M1+M2)*cos(θ1)
- + θ2_dot^2*L2*M2*cos(θ1-θ2)))
- / (L2*(2M1+M2 - M2*cos(2θ1 - 2θ2)))
-
----
-
-##  Numerical Simulation
-
-**Euler method** is used:
-
-```python
-v += a * dt
-theta += v * dt
-Simulation details:
-
-Runs two pendulums with θ + δθ (δ = 0.1°)
-
-Compares their trajectories
-
-Detects divergence > 0.1 m → chaos detection
-
-🔍 Simulation Results
-Key Findings:
-
-Chaos begins when θ₁ ≳ 90°
-
-Even if θ₂ small → chaos
-
-θ₁ controls energy input
-
-θ₂ alone does not cause chaos
-
-θ₁ = 30° or 60°, even large θ₂ stays stable
-
-θ₁ = 90° → chaos almost guaranteed
-
-Symmetry reduces chaos
-
-θ₁ = 75°, θ₂ = 75° → stable
-
-θ₁ = 75°, θ₂ = 15° → chaotic
-
-Sum of angles doesn’t predict chaos
-
-Example: (60°, 90°) — stable
-
-(30°, 120°) — chaotic
-
-📹 Physical Experiment
-Built a real double pendulum: L₁ = 24 cm, L₂ = 20 cm
-
-Angles measured using Pythagorean-based geometry
-
-Motion recorded and analyzed using Tracker software
-
-Only 5 seconds analyzed (noise + air resistance + mass distribution)
-
-Findings match simulation:
-
-θ₁ = 90° → chaos always
-
-θ₁ = 75°, θ₂ = 75° → stable
-
-θ₁ = 75°, θ₂ = 15° → chaotic
-
-Even with real-world imperfections, patterns repeat.
-
-Conclusions:
-θ₁ is the dominant variable: large θ₁ injects enough energy to destabilize
-
-Symmetry stabilizes: balanced initial conditions reduce torque differences
-
-Chaos requires specific combinations, not just big angles
-
-Running the Simulation
-Requirements:
-
-numpy
-
-matplotlib
-
-Run:
-
-bash
-Copy code
-python code/double_pendulum_simulation.py
-The script runs angle sweeps, produces chaos/stability plots, and exports figure results.
+- [Wolfram ScienceWorld: Double Pendulum](https://scienceworld.wolfram.com/physics/DoublePendulum.html)
+- [MyPhysicsLab: Double Pendulum](https://www.myphysicslab.com/pendulum/double-pendulum-en.html)
