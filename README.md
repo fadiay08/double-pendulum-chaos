@@ -3,8 +3,6 @@
 **Author:** Fadi Ayoub
 **Project:** Numerical simulation and physical experimentation investigating when a double pendulum's motion transitions from stable to chaotic behavior, as a function of its initial angles.
 
-> ⚠️ **TODO before this goes in any application:** the original write-up (see below) lists this as a joint project with Nahed Mansour, submitted as a 2-unit research project through the Maala program. Decide together how you're presenting authorship/contribution here and update this README and your application materials accordingly *before* anyone else reads this repo.
-
 ## Overview
 
 A double pendulum — two rods and masses connected in series — is a classic nonlinear, chaotic system: tiny changes in initial angle can produce completely different long-term motion. This project asks: **at what initial angles does that chaotic behavior actually kick in?**
